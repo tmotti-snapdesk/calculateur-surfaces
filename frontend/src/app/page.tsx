@@ -133,7 +133,7 @@ export default function Home() {
           <div className="p-6 border-b border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-xl font-semibold text-snapdesk-secondary">Bureaux privatifs</h3>
+                <h3 className="text-xl font-semibold text-snapdesk-secondary">Bureaux fermés</h3>
               </div>
             </div>
           </div>
