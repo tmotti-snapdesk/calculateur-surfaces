@@ -7,9 +7,8 @@ interface CalculResult {
     postesTravail: { nombre: number; surface: number }
     sallesReunion: { nombre: number; surface: number }
     bureauxFermes: { nombre: number; surface: number }
-    espacesCommuns: { coefficient: number; surface: number }
+    espacesCommuns: { nombrePersonnes: number; surface: number }
   }
-  surfaceUtile: number
   surfaceTotale: number
 }
 
@@ -85,7 +84,7 @@ export default function Home() {
                 placeholder="Ex: 10"
               />
               <p className="mt-1 text-sm text-gray-500">
-                Postes en open space (8 m² par poste)
+                Postes en open space (5,5 m² par poste)
               </p>
             </div>
 
@@ -103,25 +102,28 @@ export default function Home() {
                 placeholder="Ex: 2"
               />
               <p className="mt-1 text-sm text-gray-500">
-                Salles de 6-8 personnes (15 m² par salle)
+                25 m² par salle de réunion
               </p>
             </div>
 
             <div>
               <label htmlFor="bureaux" className="block text-sm font-medium text-gray-700 mb-2">
-                Nombre de bureaux fermés
+                Nombre de bureaux privatifs
               </label>
-              <input
-                type="number"
+              <select
                 id="bureaux"
-                min="0"
                 value={bureauxFermes}
                 onChange={(e) => setBureauxFermes(Number(e.target.value))}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-                placeholder="Ex: 1"
-              />
+              >
+                <option value={0}>0 bureau (0 m²)</option>
+                <option value={1}>1 bureau (10 m²)</option>
+                <option value={2}>2 bureaux (15 m²)</option>
+                <option value={3}>3 bureaux (20 m²)</option>
+                <option value={4}>4 bureaux (25 m²)</option>
+              </select>
               <p className="mt-1 text-sm text-gray-500">
-                Pour dirigeants ou managers (12 m² par bureau)
+                Pour dirigeants ou managers (max. 4)
               </p>
             </div>
           </div>
@@ -149,7 +151,7 @@ export default function Home() {
 
             <div className="space-y-4 mb-6">
               <div className="flex justify-between py-2 border-b border-gray-100">
-                <span className="text-gray-600">Postes de travail ({result.details.postesTravail.nombre})</span>
+                <span className="text-gray-600">Open space ({result.details.postesTravail.nombre} postes)</span>
                 <span className="font-medium text-gray-900">{result.details.postesTravail.surface} m²</span>
               </div>
               <div className="flex justify-between py-2 border-b border-gray-100">
@@ -157,12 +159,12 @@ export default function Home() {
                 <span className="font-medium text-gray-900">{result.details.sallesReunion.surface} m²</span>
               </div>
               <div className="flex justify-between py-2 border-b border-gray-100">
-                <span className="text-gray-600">Bureaux fermés ({result.details.bureauxFermes.nombre})</span>
+                <span className="text-gray-600">Bureaux privatifs ({result.details.bureauxFermes.nombre})</span>
                 <span className="font-medium text-gray-900">{result.details.bureauxFermes.surface} m²</span>
               </div>
               <div className="flex justify-between py-2 border-b border-gray-100">
-                <span className="text-gray-600">Espaces communs (+30%)</span>
-                <span className="font-medium text-gray-900">{Math.round(result.details.espacesCommuns.surface)} m²</span>
+                <span className="text-gray-600">Espaces communs ({result.details.espacesCommuns.nombrePersonnes} pers.)</span>
+                <span className="font-medium text-gray-900">{result.details.espacesCommuns.surface} m²</span>
               </div>
             </div>
 
@@ -174,7 +176,7 @@ export default function Home() {
             </div>
 
             <p className="mt-4 text-sm text-gray-500 text-center">
-              Cette estimation inclut les espaces de circulation, accueil et sanitaires.
+              Espaces communs : circulation, accueil, sanitaires, espace détente, cuisine (2,5 m²/pers.)
             </p>
           </div>
         )}
