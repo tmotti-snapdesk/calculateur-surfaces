@@ -1,27 +1,43 @@
 import { Router, Request, Response } from 'express'
-import { calculateSurface } from '../services/surface.service'
+import { calculateSurfaceBureaux, RATIOS } from '../services/surface.service'
 
 const router = Router()
 
 router.post('/calculate', (req: Request, res: Response) => {
   try {
-    const { shape, dimensions } = req.body
-    const result = calculateSurface(shape, dimensions)
-    res.json({ success: true, result })
+    const { postesTravail, sallesReunion, bureauxFermes } = req.body
+
+    // Validation des entrées
+    if (postesTravail === undefined || sallesReunion === undefined || bureauxFermes === undefined) {
+      res.status(400).json({
+        success: false,
+        error: 'Veuillez renseigner tous les champs: postesTravail, sallesReunion, bureauxFermes'
+      })
+      return
+    }
+
+    const result = calculateSurfaceBureaux({
+      postesTravail: Number(postesTravail),
+      sallesReunion: Number(sallesReunion),
+      bureauxFermes: Number(bureauxFermes)
+    })
+
+    res.json({ success: true, ...result })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Une erreur est survenue'
     res.status(400).json({ success: false, error: message })
   }
 })
 
-router.get('/shapes', (req: Request, res: Response) => {
+router.get('/ratios', (req: Request, res: Response) => {
   res.json({
-    shapes: [
-      { id: 'rectangle', name: 'Rectangle', params: ['longueur', 'largeur'] },
-      { id: 'circle', name: 'Cercle', params: ['rayon'] },
-      { id: 'triangle', name: 'Triangle', params: ['base', 'hauteur'] },
-      { id: 'trapeze', name: 'Trapèze', params: ['grandeBase', 'petiteBase', 'hauteur'] }
-    ]
+    ratios: RATIOS,
+    descriptions: {
+      POSTE_TRAVAIL: 'Surface par poste de travail en open space (m²)',
+      SALLE_REUNION: 'Surface par salle de réunion 6-8 personnes (m²)',
+      BUREAU_FERME: 'Surface par bureau fermé dirigeant (m²)',
+      COEFFICIENT_COMMUNS: 'Coefficient pour espaces communs (circulation, accueil, sanitaires)'
+    }
   })
 })
 
