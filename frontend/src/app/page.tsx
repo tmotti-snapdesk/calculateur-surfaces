@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import Image from 'next/image'
 
 // Ratios de calcul
 const RATIOS = {
@@ -26,6 +27,16 @@ export default function Home() {
   const surfaceEspacesCommuns = nombrePersonnes * RATIOS.ESPACES_COMMUNS
   const surfaceTotale = Math.round(surfaceOpenSpace + surfaceSallesReunion + surfaceBureauxPrivatifs + surfaceEspacesCommuns)
 
+  const handleInputChange = (
+    value: string,
+    setter: React.Dispatch<React.SetStateAction<number>>,
+    max?: number
+  ) => {
+    const num = parseInt(value) || 0
+    const validNum = Math.max(0, max !== undefined ? Math.min(num, max) : num)
+    setter(validNum)
+  }
+
   const increment = (setter: React.Dispatch<React.SetStateAction<number>>, max?: number) => {
     setter(prev => (max !== undefined ? Math.min(prev + 1, max) : prev + 1))
   }
@@ -39,9 +50,13 @@ export default function Home() {
       {/* Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-gray-800">
-            <span className="text-snapdesk-secondary">Snap</span>desk
-          </h1>
+          <Image
+            src="/logo-snapdesk.svg"
+            alt="Snapdesk"
+            width={160}
+            height={36}
+            priority
+          />
         </div>
       </header>
 
@@ -63,7 +78,7 @@ export default function Home() {
           </div>
 
           <div className="p-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
                 <p className="text-snapdesk-secondary font-medium">Nombre de bureaux</p>
                 <p className="text-sm text-gray-500 mt-1">
@@ -74,17 +89,22 @@ export default function Home() {
                   {bureauxPrivatifs === 4 && '4 bureaux = 25 m²'}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-4">
                 <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-                  <span className="px-4 py-2 bg-white text-gray-800 font-medium min-w-[3rem] text-center">
-                    {bureauxPrivatifs}
-                  </span>
                   <button
                     onClick={() => decrement(setBureauxPrivatifs)}
                     className="px-3 py-2 bg-snapdesk-primary text-white hover:bg-snapdesk-primary-dark transition-colors"
                   >
                     -
                   </button>
+                  <input
+                    type="number"
+                    value={bureauxPrivatifs}
+                    onChange={(e) => handleInputChange(e.target.value, setBureauxPrivatifs, 4)}
+                    className="w-16 px-2 py-2 text-center text-gray-800 font-medium border-0 focus:ring-0 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    min="0"
+                    max="4"
+                  />
                   <button
                     onClick={() => increment(setBureauxPrivatifs, 4)}
                     className="px-3 py-2 bg-snapdesk-primary text-white hover:bg-snapdesk-primary-dark transition-colors"
@@ -92,8 +112,8 @@ export default function Home() {
                     +
                   </button>
                 </div>
-                <span className="text-gray-600 ml-4">
-                  Surface estimée : <span className="font-medium">{surfaceBureauxPrivatifs} m²</span>
+                <span className="text-gray-600">
+                  Surface : <span className="font-medium">{surfaceBureauxPrivatifs} m²</span>
                 </span>
               </div>
             </div>
@@ -116,21 +136,25 @@ export default function Home() {
           </div>
 
           <div className="p-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
                 <p className="text-snapdesk-secondary font-medium">Nombre de postes</p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-4">
                 <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-                  <span className="px-4 py-2 bg-white text-gray-800 font-medium min-w-[3rem] text-center">
-                    {postesTravail}
-                  </span>
                   <button
                     onClick={() => decrement(setPostesTravail)}
                     className="px-3 py-2 bg-snapdesk-primary text-white hover:bg-snapdesk-primary-dark transition-colors"
                   >
                     -
                   </button>
+                  <input
+                    type="number"
+                    value={postesTravail}
+                    onChange={(e) => handleInputChange(e.target.value, setPostesTravail)}
+                    className="w-16 px-2 py-2 text-center text-gray-800 font-medium border-0 focus:ring-0 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    min="0"
+                  />
                   <button
                     onClick={() => increment(setPostesTravail)}
                     className="px-3 py-2 bg-snapdesk-primary text-white hover:bg-snapdesk-primary-dark transition-colors"
@@ -138,8 +162,8 @@ export default function Home() {
                     +
                   </button>
                 </div>
-                <span className="text-gray-600 ml-4">
-                  Surface estimée : <span className="font-medium">{surfaceOpenSpace} m²</span>
+                <span className="text-gray-600">
+                  Surface : <span className="font-medium">{surfaceOpenSpace} m²</span>
                 </span>
               </div>
             </div>
@@ -162,21 +186,25 @@ export default function Home() {
           </div>
 
           <div className="p-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
                 <p className="text-snapdesk-secondary font-medium">Nombre de salles</p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-4">
                 <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-                  <span className="px-4 py-2 bg-white text-gray-800 font-medium min-w-[3rem] text-center">
-                    {sallesReunion}
-                  </span>
                   <button
                     onClick={() => decrement(setSallesReunion)}
                     className="px-3 py-2 bg-snapdesk-primary text-white hover:bg-snapdesk-primary-dark transition-colors"
                   >
                     -
                   </button>
+                  <input
+                    type="number"
+                    value={sallesReunion}
+                    onChange={(e) => handleInputChange(e.target.value, setSallesReunion)}
+                    className="w-16 px-2 py-2 text-center text-gray-800 font-medium border-0 focus:ring-0 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    min="0"
+                  />
                   <button
                     onClick={() => increment(setSallesReunion)}
                     className="px-3 py-2 bg-snapdesk-primary text-white hover:bg-snapdesk-primary-dark transition-colors"
@@ -184,8 +212,8 @@ export default function Home() {
                     +
                   </button>
                 </div>
-                <span className="text-gray-600 ml-4">
-                  Surface estimée : <span className="font-medium">{surfaceSallesReunion} m²</span>
+                <span className="text-gray-600">
+                  Surface : <span className="font-medium">{surfaceSallesReunion} m²</span>
                 </span>
               </div>
             </div>
@@ -223,7 +251,7 @@ export default function Home() {
 
         {/* Total */}
         <div className="bg-snapdesk-secondary rounded-lg p-6 text-white">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <h3 className="text-xl font-semibold">Surface totale estimée</h3>
               <p className="text-white/80 text-sm mt-1">
