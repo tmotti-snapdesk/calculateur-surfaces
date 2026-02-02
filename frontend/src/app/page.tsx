@@ -118,7 +118,7 @@ export default function Home() {
             height={40}
             priority
           />
-          <span className="text-sm text-gray-500 hidden sm:block">Venez pour la flexibilité, restez pour l'expérience</span>
+          <span className="text-sm text-gray-500 hidden sm:block">{"Venez pour la flexibilité, restez pour l'expérience"}</span>
         </div>
       </header>
 
