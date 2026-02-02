@@ -51,10 +51,10 @@ export default function Home() {
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <Image
-            src="/logo-snapdesk.svg"
+            src="/logo-snapdesk.png"
             alt="Snapdesk"
             width={160}
-            height={36}
+            height={40}
             priority
           />
         </div>
