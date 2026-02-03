@@ -6,7 +6,7 @@ import Image from 'next/image'
 // Ratios de calcul
 const RATIOS = {
   POSTE_TRAVAIL: 5.5,
-  SALLE_REUNION: 25,
+  SALLE_REUNION: 13,
   ESPACES_COMMUNS: 2.5,
 }
 
@@ -14,14 +14,13 @@ const BUREAUX_PRIVATIFS: Record<number, number> = {
   0: 0, 1: 10, 2: 15, 3: 20, 4: 25,
 }
 
-// Prix par quartier (€/m²/mois)
+// Prix par quartier (€/poste/mois)
 const QUARTIERS = [
-  { id: 'premium', name: 'Triangle d\'or (8e, 16e, 17e ouest)', prixMin: 600, prixMax: 850 },
-  { id: 'centre', name: 'Centre (1er, 2e, 9e, 10e)', prixMin: 500, prixMax: 700 },
-  { id: 'est', name: 'Est parisien (3e, 4e, 11e, 12e)', prixMin: 450, prixMax: 600 },
-  { id: 'sud', name: 'Sud (5e, 6e, 13e, 14e, 15e)', prixMin: 400, prixMax: 550 },
-  { id: 'nord', name: 'Nord (17e est, 18e, 19e, 20e)', prixMin: 350, prixMax: 500 },
-  { id: 'indifferent', name: 'Pas de préférence', prixMin: 350, prixMax: 850 },
+  { id: 'premium', name: 'Triangle d\'or (8e, 16e, 17e ouest)', prixParPoste: 850 },
+  { id: 'centre', name: 'Centre (1er, 2e, 9e, 10e)', prixParPoste: 675 },
+  { id: 'est', name: 'Est parisien (3e, 4e, 11e, 12e)', prixParPoste: 650 },
+  { id: 'sud', name: 'Sud (5e, 6e, 13e, 14e, 15e)', prixParPoste: 450 },
+  { id: 'nord', name: 'Nord (17e est, 18e, 19e, 20e)', prixParPoste: 400 },
 ]
 
 const DELAIS = [
@@ -58,10 +57,9 @@ export default function Home() {
   const surfaceEspacesCommuns = nombrePersonnes * RATIOS.ESPACES_COMMUNS
   const surfaceTotale = Math.round(surfaceOpenSpace + surfaceSallesReunion + surfaceBureauxPrivatifs + surfaceEspacesCommuns)
 
-  // Calcul du prix estimé
+  // Calcul du prix estimé (par poste/mois)
   const quartierSelectionne = QUARTIERS.find(q => q.id === quartier)
-  const prixMin = quartierSelectionne ? Math.round(surfaceTotale * quartierSelectionne.prixMin / 12) : 0
-  const prixMax = quartierSelectionne ? Math.round(surfaceTotale * quartierSelectionne.prixMax / 12) : 0
+  const prixMensuel = quartierSelectionne ? nombrePersonnes * quartierSelectionne.prixParPoste : 0
 
   const handleInputChange = (
     value: string,
@@ -85,23 +83,35 @@ export default function Home() {
     e.preventDefault()
     setIsSubmitting(true)
 
-    // Simuler l'envoi (à remplacer par un vrai endpoint)
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...contactForm,
+          surface: surfaceTotale,
+          quartier: quartierSelectionne?.name || '',
+          prixMensuel,
+          delai: DELAIS.find(d => d.id === delai)?.name || '',
+          details: {
+            bureauxPrivatifs,
+            postesTravail,
+            sallesReunion,
+          }
+        })
+      })
 
-    console.log('Lead capturé:', {
-      ...contactForm,
-      surface: surfaceTotale,
-      quartier: quartierSelectionne?.name,
-      delai: DELAIS.find(d => d.id === delai)?.name,
-      details: {
-        bureauxPrivatifs,
-        postesTravail,
-        sallesReunion,
+      if (!response.ok) {
+        throw new Error('Erreur lors de l\'envoi')
       }
-    })
 
-    setIsSubmitting(false)
-    setFormSubmitted(true)
+      setFormSubmitted(true)
+    } catch (error) {
+      console.error('Erreur:', error)
+      alert('Une erreur est survenue. Veuillez réessayer.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const isCalculComplete = surfaceTotale > 0
@@ -240,6 +250,7 @@ export default function Home() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-xl font-semibold text-snapdesk-secondary">Salles de réunion</h3>
+                <p className="text-sm text-gray-500 mt-1">13 m² par salle</p>
               </div>
             </div>
           </div>
@@ -324,7 +335,7 @@ export default function Home() {
               <option value="">Sélectionnez un quartier</option>
               {QUARTIERS.map((q) => (
                 <option key={q.id} value={q.id}>
-                  {q.name} ({q.prixMin}€ - {q.prixMax}€/m²/an)
+                  {q.name} ({q.prixParPoste}€/poste/mois)
                 </option>
               ))}
             </select>
@@ -364,15 +375,15 @@ export default function Home() {
             <span className="text-4xl font-bold">{surfaceTotale} m²</span>
           </div>
 
-          {quartierSelectionne && surfaceTotale > 0 && (
+          {quartierSelectionne && nombrePersonnes > 0 && (
             <div className="border-t border-white/20 pt-4 mt-4">
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <div>
                   <h4 className="font-semibold">Budget mensuel estimé</h4>
-                  <p className="text-white/80 text-sm">{quartierSelectionne.name}</p>
+                  <p className="text-white/80 text-sm">{quartierSelectionne.name} - {quartierSelectionne.prixParPoste}€/poste</p>
                 </div>
                 <span className="text-2xl font-bold">
-                  {prixMin.toLocaleString()}€ - {prixMax.toLocaleString()}€ / mois
+                  {prixMensuel.toLocaleString()}€ / mois
                 </span>
               </div>
             </div>
@@ -486,9 +497,17 @@ export default function Home() {
             <h3 className="text-xl font-semibold text-green-800 mb-2">
               Demande envoyée avec succès !
             </h3>
-            <p className="text-green-700">
+            <p className="text-green-700 mb-4">
               Un expert Snapdesk vous contactera dans les 24h avec une sélection personnalisée de bureaux.
             </p>
+            <a
+              href="https://calendar.app.google/qgcSXuaYUbm2C5Xh8"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-snapdesk-secondary text-white px-6 py-3 rounded-lg font-semibold hover:bg-snapdesk-secondary-dark transition-colors"
+            >
+              Réserver un créneau maintenant
+            </a>
           </div>
         )}
 
