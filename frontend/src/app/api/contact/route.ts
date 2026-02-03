@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 interface ContactData {
   entreprise: string
   nom: string
@@ -22,6 +20,15 @@ interface ContactData {
 export async function POST(request: NextRequest) {
   try {
     const data: ContactData = await request.json()
+
+    // Vérifier si la clé API est configurée
+    if (!process.env.RESEND_API_KEY) {
+      console.log('RESEND_API_KEY non configurée - Lead reçu:', data)
+      // En mode dev/sans clé, on simule le succès
+      return NextResponse.json({ success: true, message: 'Mode test - email non envoyé' })
+    }
+
+    const resend = new Resend(process.env.RESEND_API_KEY)
 
     // Email de notification à Snapdesk
     await resend.emails.send({
